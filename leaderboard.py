@@ -11,6 +11,7 @@ s = session()
 
 
 class Results(Base):
+    """Results database schema"""
     __tablename__ = 'Results'
 
     id = Column(Integer, primary_key=True)
@@ -19,6 +20,7 @@ class Results(Base):
 
 
 def remove_weakest(records):
+    """Remove worst result"""
     results = [i.result for i in records]
     weakest = results.index(min(results))
     record_id = [i.id for i in records]
@@ -28,6 +30,7 @@ def remove_weakest(records):
 
 
 def add(player_name, player_result):
+    """Add new result to database"""
     s.add(Results(name=player_name, result=player_result))
     records = s.query(Results).all()
     if len(records) > 10:
@@ -36,11 +39,14 @@ def add(player_name, player_result):
 
 
 def show_results(screen):
+    """Display previous best results"""
     x = 100
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            return 'menu'
     pygame.font.init()
     my_font = pygame.font.SysFont('Comic Sans MS', 30)
     label = []
@@ -52,7 +58,7 @@ def show_results(screen):
         screen.blit(i, (450, x))
         x += 60
     pygame.display.update()
+    Base.metadata.create_all(engine)
+    s.close()
+    return None
 
-
-Base.metadata.create_all(engine)
-s.close()

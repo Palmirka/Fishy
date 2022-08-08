@@ -11,6 +11,7 @@ start_size_y = 36
 
 
 class Enemy:
+    """Enemy"""
     def __init__(self, left, y, enemy_speed, size, bigger):
         self.size = size
         if bigger:
@@ -36,6 +37,7 @@ class Enemy:
 
 
 class Player:
+    """Player"""
     def __init__(self, x=500, y=400):
         self.img = pygame.image.load('images/playerImg.png')
         self.original_img = self.img
@@ -46,20 +48,24 @@ class Player:
         self.size_y = start_size_y
 
     def turn(self, side):
+        """Turn player"""
         if side != self.left:
             self.left = not self.left
             self.img = pygame.transform.flip(self.img, True, False)
 
     def move(self, screen):
+        """Move player"""
         screen.blit(self.img, (self.x, self.y))
 
     def set_position(self, x, y):
+        """Set position"""
         if -1 < x < 921:
             self.x = x
         if -1 < y < 721:
             self.y = y
 
     def resize(self, points):
+        """Resize"""
         self.size_x += points
         self.size_y += points*0.5625
         self.img = pygame.transform.scale(self.original_img, (self.size_x, self.size_y))
@@ -68,6 +74,7 @@ class Player:
 
 
 def move_enemies(enemy, screen):
+    """Move enemies"""
     for i in enemy:
         i.move(screen)
         if (-1)*i.size > i.x or i.x > 1000 + i.size:
@@ -75,6 +82,7 @@ def move_enemies(enemy, screen):
 
 
 def catch_keys(player):
+    """Handle keyword actions"""
     keys = pygame.key.get_pressed()  # checking pressed keys
     if keys[pygame.K_UP]:
         player.set_position(-1, player.y - speed)
@@ -89,6 +97,7 @@ def catch_keys(player):
 
 
 def spawn_enemy(enemy, player):
+    """Spawn enemy"""
     if not random.randint(0, 200):
         left = random.randint(0, 2)
         enemy_speed = random.randint(0, 60) / 100 + 0.3
@@ -98,6 +107,7 @@ def spawn_enemy(enemy, player):
 
 
 def check_collisions(player, enemy):
+    """Check collision"""
     x = player.x
     y = player.y
     size_x = player.size_x
@@ -115,57 +125,44 @@ def check_collisions(player, enemy):
     return 0
 
 
+class Game:
+    """Game data"""
+    state = 'game'
+    first = True
+
+
 players = Player()
 enemies = []
 threads = []
-
-t1 = None
-t2 = None
-first = True
-state = 0
-
-
-def set_state(x):
-    global state
-    state = x
-
-
-def get_state():
-    return state
-
-
-def set_first(x):
-    global first
-    first = x
-
-
-def get_first():
-    return first
+game = Game()
 
 
 def restart():
-    set_state(0)
-    set_first(True)
+    """Restart game"""
+    game.state = 'game'
+    game.first = True
     enemies.clear()
     players.set_position(500, 400)
     players.resize(64-players.size_x)
 
 
 def player_thread(player, screen, enemy):
+    """Player thread"""
     while not check_collisions(players, enemy):
         catch_keys(player)
         player.move(screen)
     leaderboard.add(menu.name, player.size_x - 64)
-    set_state(1)
+    game.state = 'menu'
 
 
 def gameplay(screen):
-    if get_first():
+    """Gameplay"""
+    if game.first:
         threads.clear()
         threads.append(threading.Thread(target=player_thread, args=(players, screen, enemies)))
         for thread in threads:
             thread.start()
-        set_first(False)
+        game.first = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -173,4 +170,4 @@ def gameplay(screen):
     spawn_enemy(enemies, players)
     move_enemies(enemies, screen)
     pygame.display.update()
-    return get_state()
+    return game.state

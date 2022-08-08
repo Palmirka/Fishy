@@ -3,6 +3,7 @@ import sys
 
 
 class Button:
+    """Button"""
     def __init__(self, x, y, img):
         self.x = x
         self.y = y
@@ -37,16 +38,14 @@ buttons = [Button(350, 350, start_pic), Button(350, 500, scores_pic), Button(350
            Button(350, 200, input_pic)]
 
 
-def get_name():
-    return name
-
-
 def set_name(x):
+    """Set name"""
     global name
     name = x
 
 
 def start_menu(screen):
+    """Start menu screen"""
     for i in buttons:
         i.display(screen)
     buttons[3].display_text(screen, name)
@@ -55,20 +54,20 @@ def start_menu(screen):
             pygame.quit()
             sys.exit()
         if buttons[0].mouse_click(event):
-            return 0
+            return 'game'
         if buttons[1].mouse_click(event):
-            return 2
+            return 'leaderboard'
         if buttons[3].mouse_click(event):
             x = True
             while x:
                 for e in pygame.event.get():
                     if e.type == pygame.KEYDOWN:
                         if e.key == pygame.K_BACKSPACE:
-                            if len(get_name()) > 0:
-                                set_name(get_name()[:-1])
-                        elif len(get_name()) < 12:
-                            set_name(get_name()+e.unicode)
-                        buttons[3].display_text(screen, get_name())
+                            if len(name) > 0:
+                                set_name(name[:-1])
+                        elif len(name) < 12:
+                            set_name(name+e.unicode)
+                        buttons[3].display_text(screen, name)
                     elif e.type == pygame.MOUSEBUTTONDOWN:
                         x = False
                     elif e.type == pygame.QUIT:
@@ -76,4 +75,4 @@ def start_menu(screen):
                         sys.exit()
 
     pygame.display.update()
-    return 1
+    return 'menu'
